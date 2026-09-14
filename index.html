@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Card Float Planner</title>
+<style>
+  :root {
+    --ink: #16233b;
+    --ink-soft: #3c4a63;
+    --paper: #eeece4;
+    --paper-raised: #f7f6f1;
+    --line: #cfcabb;
+    --gold: #a9822f;
+    --good: #2f6b4f;
+    --mid: #8a6d1f;
+    --low: #9c3b2e;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--paper); color: var(--ink);
+    font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+  .wrap { max-width: 620px; margin: 0 auto; padding: 24px 16px 60px; }
+  .masthead { border-bottom: 2px solid var(--ink); padding-bottom: 14px; margin-bottom: 18px; }
+  .masthead .label { font-size: 12px; letter-spacing: 0.04em; color: var(--ink-soft); margin-bottom: 6px; }
+  h1 { font-family: Georgia, "Iowan Old Style", "Times New Roman", serif; font-size: 26px; font-weight: 600; margin: 0; line-height: 1.15; }
+  .sub { font-size: 13.5px; color: var(--ink-soft); margin-top: 8px; max-width: 50ch; }
+
+  .nav { display: flex; gap: 2px; margin-bottom: 18px; border: 1px solid var(--ink); }
+  .nav button { flex: 1; padding: 10px 4px; font-size: 12.5px; border: none; background: var(--paper-raised);
+    color: var(--ink-soft); cursor: pointer; font-family: inherit; border-right: 1px solid var(--line); }
+  .nav button:last-child { border-right: none; }
+  .nav button.active { background: var(--ink); color: var(--paper-raised); font-weight: 600; }
+
+  .banner { border: 1.5px solid var(--low); background: #fbecea; padding: 12px 14px; margin-bottom: 18px; font-size: 13px; }
+  .banner .btitle { font-weight: 600; color: var(--low); margin-bottom: 6px; font-size: 12px; letter-spacing: 0.02em; }
+  .banner ul { margin: 0; padding-left: 18px; }
+  .banner li { margin-bottom: 3px; }
+
+  .picker { display: flex; align-items: center; gap: 12px; background: var(--paper-raised); border: 1px solid var(--line); padding: 14px 16px; margin: 0 0 20px; }
+  .picker label { font-size: 13px; color: var(--ink-soft); white-space: nowrap; }
+  .picker input[type="date"], .picker select { flex: 1; font-size: 15px; border: 1px solid var(--line); background: #fff; padding: 8px 10px; color: var(--ink); font-family: inherit; }
+
+  .best { border: 1.5px solid var(--ink); padding: 18px 18px 16px; margin-bottom: 22px; background: var(--paper-raised); }
+  .best .tag { font-size: 11px; letter-spacing: 0.03em; color: var(--gold); margin-bottom: 6px; }
+  .best .name { font-family: Georgia, serif; font-size: 21px; margin: 0 0 4px; }
+  .best .detail { font-size: 13px; color: var(--ink-soft); line-height: 1.5; }
+  .best .days { font-family: Georgia, serif; font-size: 14.5px; color: var(--good); margin-top: 6px; }
+  .best .warn { font-size: 12.5px; color: var(--low); margin-top: 4px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead th { text-align: left; font-weight: 600; font-size: 11px; color: var(--ink-soft); border-bottom: 1px solid var(--ink); padding: 6px 5px 8px; }
+  thead th.num, td.num { text-align: right; }
+  tbody td { padding: 9px 5px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  tbody tr.top td { background: rgba(169,130,47,0.08); }
+  .card-name { font-weight: 600; }
+  .card-note { font-size: 11px; color: var(--ink-soft); display: block; margin-top: 2px; }
+  .days-val { font-weight: 600; }
+  .days-good { color: var(--good); } .days-mid { color: var(--mid); } .days-low { color: var(--low); }
+
+  .section-title { font-family: Georgia, serif; font-size: 17px; margin: 24px 0 10px; padding-top: 16px; border-top: 1px solid var(--line); }
+  .section-title:first-child { border-top: none; padding-top: 0; margin-top: 0; }
+
+  /* calendar */
+  .cal-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .cal-nav button { background: var(--paper-raised); border: 1px solid var(--line); padding: 6px 12px; font-size: 13px; cursor: pointer; }
+  .cal-nav .month-label { font-family: Georgia, serif; font-size: 16px; }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+  .cal-dow { font-size: 10px; color: var(--ink-soft); text-align: center; padding-bottom: 4px; }
+  .cal-cell { min-height: 52px; background: var(--paper-raised); border: 1px solid var(--line); padding: 4px; font-size: 10px; position: relative; }
+  .cal-cell.empty { background: transparent; border: none; }
+  .cal-cell .d { font-size: 11px; font-weight: 600; color: var(--ink-soft); }
+  .cal-cell .c { font-size: 10px; margin-top: 3px; line-height: 1.2; font-weight: 600; }
+  .cal-cell.g1 { background: #e2ede4; } .cal-cell.g2 { background: #eef1de; } .cal-cell.g3 { background: #f5e9e6; }
+  .legend { display: flex; gap: 14px; font-size: 11px; color: var(--ink-soft); margin-top: 10px; }
+  .legend span { display: inline-flex; align-items: center; gap: 5px; }
+  .legend i { width: 10px; height: 10px; display: inline-block; }
+
+  /* cards tab */
+  .card-edit { border: 1px solid var(--line); background: var(--paper-raised); padding: 12px 14px; margin-bottom: 10px; }
+  .card-edit .row1 { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+  .card-edit .row1 .cn { font-family: Georgia, serif; font-size: 16px; }
+  .field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .field { display: flex; flex-direction: column; gap: 3px; }
+  .field label { font-size: 10.5px; color: var(--ink-soft); }
+  .field input { border: 1px solid var(--line); padding: 6px 8px; font-size: 13px; font-family: inherit; background: #fff; }
+  .util-bar { height: 5px; background: var(--line); margin-top: 8px; position: relative; }
+  .util-bar div { height: 100%; }
+  .util-label { font-size: 11px; margin-top: 4px; color: var(--ink-soft); }
+
+  /* purchases tab */
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+  .form-grid .full { grid-column: 1 / -1; }
+  .form-grid label { font-size: 10.5px; color: var(--ink-soft); display: block; margin-bottom: 3px; }
+  .form-grid input, .form-grid select { width: 100%; border: 1px solid var(--line); padding: 7px 8px; font-size: 13px; font-family: inherit; background: #fff; }
+  .emi-row { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--ink-soft); }
+  .btn { background: var(--ink); color: var(--paper-raised); border: none; padding: 9px 16px; font-size: 13px; cursor: pointer; font-family: inherit; }
+  .btn.secondary { background: transparent; color: var(--ink); border: 1px solid var(--ink); }
+  .purchase-row { display: flex; justify-content: space-between; border-bottom: 1px solid var(--line); padding: 8px 2px; font-size: 12.5px; }
+  .purchase-row .pdel { color: var(--low); cursor: pointer; font-size: 11px; }
+  .emi-tag { font-size: 10px; background: var(--gold); color: #fff; padding: 1px 5px; margin-left: 6px; }
+
+  .foot { margin-top: 24px; font-size: 11.5px; color: var(--ink-soft); line-height: 1.6; border-top: 1px solid var(--line); padding-top: 12px; }
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+
+<script>
+// ---------- state (in-memory only, resets on reload) ----------
+const state = {
+  activeTab: 'planner',
+  calMonth: new Date().getMonth(),
+  calYear: new Date().getFullYear(),
+  cards: [
+    { id: 'myzone',    name: 'Axis Myzone',     note: 'RuPay UPI',   billingDay: 12, grace: 20, limit: 50000,  balance: 0 },
+    { id: 'neo',       name: 'Axis Neo',        note: null,          billingDay: 13, grace: 20, limit: 50000,  balance: 0 },
+    { id: 'simply',    name: 'SBI SimplyClick', note: null,          billingDay: 16, grace: 19, limit: 100000, balance: 0 },
+    { id: 'simplysave',name: 'SBI SimplySave',  note: 'RuPay UPI',   billingDay: 16, grace: 19, limit: 50000,  balance: 0 },
+    { id: 'rbl',       name: 'RBL',             note: null,          billingDay: 17, grace: 20, limit: 100000, balance: 0 },
+    { id: 'privilege', name: 'Axis Privilege',  note: null,          billingDay: 18, grace: 20, limit: 150000, balance: 0 },
+    { id: 'slice',     name: 'Slice',           note: 'RuPay UPI · shortest grace', billingDay: 21, grace: 14, limit: 30000, balance: 0 },
+  ],
+  purchases: [] // {id, cardId, date, amount, isEMI, installmentAmount, note}
+};
+
+// ---------- helpers ----------
+function fmt(d) { return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }); }
+function fmtShort(d) { return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }); }
+function inr(n) { return '₹' + Math.round(n).toLocaleString('en-IN'); }
+function todayMid() { const t = new Date(); t.setHours(0,0,0,0); return t; }
+
+function cycleForDate(card, spend) {
+  const y = spend.getFullYear(), m = spend.getMonth();
+  let close = new Date(y, m, card.billingDay);
+  if (spend > close) close = new Date(y, m + 1, card.billingDay);
+  const due = new Date(close);
+  due.setDate(due.getDate() + card.grace);
+  const days = Math.round((due - spend) / 86400000);
+  return { close, due, days };
+}
+
+function outstandingFor(cardId) {
+  return state.purchases
+    .filter(p => p.cardId === cardId)
+    .reduce((sum, p) => sum + (p.isEMI ? (p.installmentAmount || p.amount) : p.amount), 0);
+}
+
+function totalOutstanding(card) { return card.balance + outstandingFor(card.id); }
+
+function utilPct(card) {
+  if (!card.limit) return 0;
+  return Math.min(100, Math.round((totalOutstanding(card) / card.limit) * 100));
+}
+
+function utilColor(pct) { return pct >= 80 ? 'var(--low)' : pct >= 50 ? 'var(--mid)' : 'var(--good)'; }
+
+function upcomingDues(withinDays) {
+  const today = todayMid();
+  const out = [];
+  state.cards.forEach(card => {
+    const c = cycleForDate(card, today);
+    const daysToDue = Math.round((c.due - today) / 86400000);
+    if (daysToDue >= 0 && daysToDue <= withinDays) {
+      out.push({ card, due: c.due, daysToDue, amount: totalOutstanding(card) });
+    }
+  });
+  return out.sort((a,b) => a.daysToDue - b.daysToDue);
+}
+
+// ---------- render root ----------
+function render() {
+  const app = document.getElementById('app');
+  app.innerHTML = `
+    <div class="masthead">
+      <div class="label">CARD FLOAT PLANNER</div>
+      <h1>Plan spends, track limits, catch due dates</h1>
+      <div class="sub">Pick a date for the best card, scan the month as a calendar, log real purchases against limits, and never miss a due date.</div>
+    </div>
+    <div class="nav">
+      <button data-tab="planner" class="${state.activeTab==='planner'?'active':''}">Planner</button>
+      <button data-tab="calendar" class="${state.activeTab==='calendar'?'active':''}">Calendar</button>
+      <button data-tab="purchases" class="${state.activeTab==='purchases'?'active':''}">Purchases</button>
+      <button data-tab="cards" class="${state.activeTab==='cards'?'active':''}">Cards</button>
+    </div>
+    ${renderReminderBanner()}
+    <div id="tabbody"></div>
+    <div class="foot">All data lives in this browser tab only — it resets if you reload the page. Grace periods are set from confirmed statement/due dates you provided; edit anything in the Cards tab.</div>
+  `;
+  document.querySelectorAll('.nav button').forEach(b => b.onclick = () => { state.activeTab = b.dataset.tab; render(); });
+  const body = document.getElementById('tabbody');
+  if (state.activeTab === 'planner') body.innerHTML = renderPlanner();
+  if (state.activeTab === 'calendar') body.innerHTML = renderCalendar();
+  if (state.activeTab === 'purchases') body.innerHTML = renderPurchases();
+  if (state.activeTab === 'cards') body.innerHTML = renderCards();
+  attachTabHandlers();
+}
+
+function renderReminderBanner() {
+  const dues = upcomingDues(5);
+  if (dues.length === 0) return '';
+  return `
+    <div class="banner">
+      <div class="btitle">DUE WITHIN 5 DAYS</div>
+      <ul>
+        ${dues.map(d => `<li>${d.card.name} — due ${fmtShort(d.due)} (${d.daysToDue === 0 ? 'today' : d.daysToDue + ' day' + (d.daysToDue>1?'s':'')})${d.amount>0 ? ` · logged outstanding ${inr(d.amount)}` : ''}</li>`).join('')}
+      </ul>
+    </div>`;
+}
+
+// ---------- Planner tab ----------
+let plannerDate = new Date();
+function renderPlanner() {
+  const results = state.cards.map(card => ({ card, ...cycleForDate(card, plannerDate) }))
+    .sort((a,b) => b.days - a.days);
+  const max = results[0].days;
+  const top = results[0];
+  const topAvail = top.card.limit ? top.card.limit - totalOutstanding(top.card) : null;
+
+  return `
+    <div class="picker">
+      <label for="spendDate">Spending on</label>
+      <input type="date" id="spendDate" value="${plannerDate.toISOString().slice(0,10)}">
+    </div>
+    <div class="best">
+      <div class="tag">BEST CHOICE FOR THIS DATE</div>
+      <p class="name">${top.card.name}</p>
+      <div class="detail">Statement closes ${fmt(top.close)} · payment due ${fmt(top.due)}${top.card.note ? ' · ' + top.card.note : ''}</div>
+      <div class="days">${top.days} days before payment is due</div>
+      ${topAvail !== null ? `<div class="detail">Available limit right now: ${inr(topAvail)} of ${inr(top.card.limit)}</div>` : ''}
+      ${topAvail !== null && topAvail < 0 ? `<div class="warn">Over limit on current logged balance — check the Purchases tab.</div>` : ''}
+    </div>
+    <table>
+      <thead><tr><th>Card</th><th>Statement closes</th><th>Due date</th><th class="num">Days</th></tr></thead>
+      <tbody>
+        ${results.map((r,i) => `
+          <tr class="${i===0?'top':''}">
+            <td><span class="card-name">${r.card.name}</span>${r.card.note ? `<span class="card-note">${r.card.note}</span>`:''}</td>
+            <td>${fmt(r.close)}</td>
+            <td>${fmt(r.due)}</td>
+            <td class="num days-val ${r.days===max?'days-good':r.days>=max-7?'days-mid':'days-low'}">${r.days}</td>
+          </tr>`).join('')}
+      </tbody>
+    </table>
+  `;
+}
+
+// ---------- Calendar tab ----------
+function renderCalendar() {
+  const y = state.calYear, m = state.calMonth;
+  const first = new Date(y, m, 1);
+  const startDow = first.getDay();
+  const daysInMonth = new Date(y, m+1, 0).getDate();
+  const monthLabel = first.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
+
+  let cells = '';
+  for (let i=0; i<startDow; i++) cells += `<div class="cal-cell empty"></div>`;
+  for (let d=1; d<=daysInMonth; d++) {
+    const date = new Date(y, m, d);
+    const results = state.cards.map(card => ({ card, ...cycleForDate(card, date) })).sort((a,b)=>b.days-a.days);
+    const top = results[0];
+    const gclass = top.days >= 35 ? 'g1' : top.days >= 20 ? 'g2' : 'g3';
+    const shortName = top.card.name.replace('Axis ','').replace('SBI ','');
+    cells += `<div class="cal-cell ${gclass}"><div class="d">${d}</div><div class="c">${shortName}</div></div>`;
+  }
+
+  return `
+    <div class="cal-nav">
+      <button data-cal="prev">← prev</button>
+      <div class="month-label">${monthLabel}</div>
+      <button data-cal="next">next →</button>
+    </div>
+    <div class="cal-grid">
+      ${['S','M','T','W','T','F','S'].map(d=>`<div class="cal-dow">${d}</div>`).join('')}
+      ${cells}
+    </div>
+    <div class="legend">
+      <span><i style="background:#e2ede4"></i>35+ days float</span>
+      <span><i style="background:#eef1de"></i>20–34 days</span>
+      <span><i style="background:#f5e9e6"></i>under 20 days</span>
+    </div>
+  `;
+}
+
+// ---------- Purchases tab ----------
+function renderPurchases() {
+  const cardOptions = state.cards.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+  const purchaseRows = state.purchases.slice().sort((a,b) => new Date(a.date) - new Date(b.date)).map(p => {
+    const card = state.cards.find(c => c.id === p.cardId);
+    const c = cycleForDate(card, new Date(p.date));
+    return `<div class="purchase-row">
+      <span>${fmtShort(new Date(p.date))} · ${card.name} · ${inr(p.amount)}${p.isEMI ? `<span class="emi-tag">EMI ${inr(p.installmentAmount||p.amount)}/mo</span>`:''}<br>
+      <span style="color:var(--ink-soft); font-size:11px;">due ${fmtShort(c.due)}${p.note ? ' · '+p.note : ''}</span></span>
+      <span class="pdel" data-del="${p.id}">remove</span>
+    </div>`;
+  }).join('') || `<div style="font-size:12.5px;color:var(--ink-soft);padding:8px 2px;">No purchases logged yet.</div>`;
+
+  const utilCards = state.cards.map(card => {
+    const pct = utilPct(card);
+    return `<div class="purchase-row"><span>${card.name}</span><span style="color:${utilColor(pct)}; font-weight:600;">${inr(totalOutstanding(card))} / ${card.limit ? inr(card.limit) : '—'} (${pct}%)</span></div>`;
+  }).join('');
+
+  return `
+    <div class="section-title">Log a purchase</div>
+    <div class="form-grid">
+      <div><label>Date</label><input type="date" id="pDate" value="${new Date().toISOString().slice(0,10)}"></div>
+      <div><label>Amount</label><input type="number" id="pAmount" placeholder="0"></div>
+      <div class="full"><label>Card</label>
+        <select id="pCard"><option value="__auto">Auto-suggest best card</option>${cardOptions}</select>
+      </div>
+      <div class="full emi-row">
+        <input type="checkbox" id="pEMI"> <label for="pEMI" style="margin:0;">This is an EMI conversion</label>
+      </div>
+      <div id="emiField" style="display:none;"><label>Monthly installment</label><input type="number" id="pInstallment" placeholder="0"></div>
+      <div class="full"><label>Note (optional)</label><input type="text" id="pNote" placeholder="e.g. laptop, groceries"></div>
+    </div>
+    <button class="btn" id="addPurchase">Add purchase</button>
+
+    <div class="section-title">Logged purchases</div>
+    ${purchaseRows}
+
+    <div class="section-title">Outstanding vs limit</div>
+    ${utilCards}
+  `;
+}
+
+// ---------- Cards tab ----------
+function renderCards() {
+  return state.cards.map(card => {
+    const pct = utilPct(card);
+    return `
+    <div class="card-edit" data-cardid="${card.id}">
+      <div class="row1"><span class="cn">${card.name}</span>${card.note ? `<span class="card-note">${card.note}</span>`:''}</div>
+      <div class="field-grid">
+        <div class="field"><label>Billing day</label><input type="number" min="1" max="28" class="f-billing" value="${card.billingDay}"></div>
+        <div class="field"><label>Grace period (days)</label><input type="number" min="1" max="60" class="f-grace" value="${card.grace}"></div>
+        <div class="field"><label>Credit limit</label><input type="number" class="f-limit" value="${card.limit||''}"></div>
+        <div class="field"><label>Starting balance</label><input type="number" class="f-balance" value="${card.balance||0}"></div>
+      </div>
+      <div class="util-bar"><div style="width:${pct}%; background:${utilColor(pct)};"></div></div>
+      <div class="util-label">${inr(totalOutstanding(card))} outstanding of ${card.limit ? inr(card.limit) : 'no limit set'} (${pct}%)</div>
+    </div>`;
+  }).join('') + `<button class="btn secondary" id="saveCards">Save changes</button>`;
+}
+
+// ---------- event wiring ----------
+function attachTabHandlers() {
+  if (state.activeTab === 'planner') {
+    document.getElementById('spendDate').addEventListener('change', e => {
+      plannerDate = new Date(e.target.value + 'T00:00:00');
+      document.getElementById('tabbody').innerHTML = renderPlanner();
+      attachTabHandlers();
+    });
+  }
+  if (state.activeTab === 'calendar') {
+    document.querySelectorAll('[data-cal]').forEach(b => b.onclick = () => {
+      if (b.dataset.cal === 'prev') { state.calMonth--; if (state.calMonth<0){state.calMonth=11; state.calYear--;} }
+      else { state.calMonth++; if (state.calMonth>11){state.calMonth=0; state.calYear++;} }
+      document.getElementById('tabbody').innerHTML = renderCalendar();
+      attachTabHandlers();
+    });
+  }
+  if (state.activeTab === 'purchases') {
+    const emiBox = document.getElementById('pEMI');
+    const emiField = document.getElementById('emiField');
+    emiBox.onchange = () => { emiField.style.display = emiBox.checked ? 'flex' : 'none'; };
+    document.getElementById('addPurchase').onclick = () => {
+      const date = document.getElementById('pDate').value;
+      const amount = parseFloat(document.getElementById('pAmount').value) || 0;
+      let cardId = document.getElementById('pCard').value;
+      const isEMI = emiBox.checked;
+      const installmentAmount = parseFloat(document.getElementById('pInstallment').value) || 0;
+      const note = document.getElementById('pNote').value;
+      if (!date || amount <= 0) return;
+
+      if (cardId === '__auto') {
+        const spend = new Date(date + 'T00:00:00');
+        const ranked = state.cards.map(c => {
+          const cyc = cycleForDate(c, spend);
+          const avail = c.limit ? c.limit - totalOutstanding(c) : Infinity;
+          return { c, days: cyc.days, fits: avail >= amount };
+        }).sort((a,b) => (b.fits - a.fits) || (b.days - a.days));
+        cardId = ranked[0].c.id;
+      }
+
+      state.purchases.push({
+        id: 'p' + Date.now() + Math.random().toString(36).slice(2,6),
+        cardId, date, amount, isEMI, installmentAmount, note
+      });
+      document.getElementById('tabbody').innerHTML = renderPurchases();
+      attachTabHandlers();
+    };
+    document.querySelectorAll('[data-del]').forEach(el => el.onclick = () => {
+      state.purchases = state.purchases.filter(p => p.id !== el.dataset.del);
+      document.getElementById('tabbody').innerHTML = renderPurchases();
+      attachTabHandlers();
+    });
+  }
+  if (state.activeTab === 'cards') {
+    document.getElementById('saveCards').onclick = () => {
+      document.querySelectorAll('.card-edit').forEach(el => {
+        const id = el.dataset.cardid;
+        const card = state.cards.find(c => c.id === id);
+        card.billingDay = parseInt(el.querySelector('.f-billing').value) || card.billingDay;
+        card.grace = parseInt(el.querySelector('.f-grace').value) || card.grace;
+        card.limit = parseFloat(el.querySelector('.f-limit').value) || null;
+        card.balance = parseFloat(el.querySelector('.f-balance').value) || 0;
+      });
+      render();
+    };
+  }
+}
+
+render();
+</script>
+</body>
+</html>
