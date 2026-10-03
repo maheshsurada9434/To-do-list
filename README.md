@@ -6,11 +6,11 @@ Open `index.html` in any browser, or host it on GitHub Pages. No build step, no 
 
 ## Features
 
-- **Planner** – pick a date (and optionally an amount) and see every card ranked by interest-free days. Cards without enough free limit drop to the bottom.
+- **Planner** – your best card for today, shown as a real-looking credit card. Swipe the 3-week day strip to see the best card for any upcoming day, add an amount to skip cards without enough free limit, and see every card ranked by interest-free days.
 - **Calendar** – the best card for each day of the month, colour-coded by float length, with dots on payment due dates. Tap a day to open it in the planner.
 - **Spends** – log purchases (auto-assigned to the best card or picked manually), including EMI conversions. Shows statements that need paying, with one-tap **Mark paid**, current-cycle totals and limit usage per card.
 - **Cards** – add, edit and delete cards. Statement day 29–31 is handled correctly in shorter months.
-- **Reminders** – a banner lists every payment due in the next 5 days (or overdue), plus a badge on the Spends tab.
+- **Reminders** – a *Due soon* list on the Planner shows payments due in the next 5 days (or overdue), plus a badge on the Spends tab.
 - **Your data stays yours** – everything is saved automatically in the browser (`localStorage`). Export / import a JSON backup from the Cards tab to move between devices.
 - **Premium card view** – the best card is shown as a realistic credit card (chip, contactless mark, embossed dates) in the colour you pick for each card.
 - Dark mode, mobile-first layout, keyboard and screen-reader friendly.
