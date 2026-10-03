@@ -39,10 +39,3 @@ A spend made the day *after* a card's statement date gets the maximum float (abo
 ## Privacy
 
 Nothing leaves your device. There is no server, analytics or tracking.
-
-## Also in this repo: Doable
-
-[`doable/`](doable/) is an advanced, offline to-do app. You type tasks in plain English, and it picks up dates, times, #tags, !priority and repeats. It also has subtasks, a focus timer and lists. It installs to your home screen like Card Float.
-
-**Live:** https://maheshsurada9434.github.io/card-float-planner/doable/
-
