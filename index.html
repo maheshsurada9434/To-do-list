@@ -5,6 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="description" content="Pick the credit card with the longest interest-free period for any day, track limits and never miss a due date.">
 <meta name="theme-color" content="#1a2330">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Card Float">
 <title>Card Float</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='2' y='7' width='28' height='18' rx='4' fill='%231a2330'/%3E%3Crect x='6' y='12' width='7' height='5' rx='1.2' fill='%23c29b52'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -60,6 +66,17 @@
   .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 17px; letter-spacing: -0.01em; }
   .brand svg { width: 26px; height: 18px; }
   .today { font-size: 13px; color: var(--stage-muted); }
+  .top-right { display: flex; align-items: center; gap: 12px; }
+  .install { height: 32px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--brass); background: transparent; color: var(--brass);
+    font-size: 13px; font-weight: 700; cursor: pointer; }
+  .install:hover { background: var(--brass); color: #1a1408; }
+  .install:not([hidden]) + .today { display: none; }
+  dialog.sheet { border: none; border-radius: 20px; padding: 22px 20px 18px; max-width: 360px; width: calc(100% - 32px);
+    background: var(--surface); color: var(--ink); box-shadow: 0 24px 60px -20px rgba(0,0,0,.6); }
+  dialog.sheet::backdrop { background: rgba(10,14,20,.55); }
+  .sheet h2 { margin-bottom: 6px; }
+  .sheet ol { padding-left: 20px; margin: 12px 0 18px; line-height: 1.7; }
+  .sheet .share-ic { display: inline-block; width: 16px; height: 16px; vertical-align: -2px; }
 
   /* ---------- planner stage ---------- */
   .stage { background: var(--stage); color: var(--stage-ink); border-radius: 0 0 28px 28px; padding: 6px 0 22px; margin-bottom: 22px; }
@@ -284,7 +301,7 @@
 <header class="top">
   <div class="wrap">
     <div class="brand"><svg viewBox="0 0 26 18" aria-hidden="true"><rect x=".5" y=".5" width="25" height="17" rx="3.5" fill="none" stroke="#c29b52"/><rect x="4" y="6" width="6" height="5" rx="1" fill="#c29b52"/></svg>Card Float</div>
-    <div class="today" id="todayLabel"></div>
+    <div class="top-right"><button class="install" id="installBtn" hidden>Install app</button><div class="today" id="todayLabel"></div></div>
   </div>
 </header>
 <main id="tabbody"></main>
@@ -292,6 +309,16 @@
 <nav class="tabbar" id="nav" role="tablist" aria-label="Sections"></nav>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <input type="file" id="importFile" accept="application/json,.json" hidden>
+<dialog class="sheet" id="iosSheet" aria-labelledby="iosTitle">
+  <h2 id="iosTitle">Add Card Float to your Home Screen</h2>
+  <p class="meta" style="color:var(--muted);margin:0">It opens full screen like an app and works offline.</p>
+  <ol>
+    <li>Tap the <strong>Share</strong> button <svg class="share-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 8l5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg> in Safari.</li>
+    <li>Scroll down and tap <strong>Add to Home Screen</strong>.</li>
+    <li>Tap <strong>Add</strong>.</li>
+  </ol>
+  <form method="dialog"><button class="btn" style="width:100%">Got it</button></form>
+</dialog>
 
 <script>
 'use strict';
@@ -1101,6 +1128,37 @@ function importData(file) {
     } catch (err) { toast('That file isn’t a Card Float backup'); }
   };
   reader.readAsText(file);
+}
+
+/* =========================================================
+   Install as an app
+   ========================================================= */
+const isStandalone = () => window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+let installPrompt = null;
+const installBtn = document.getElementById('installBtn');
+
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  installPrompt = e;
+  if (!isStandalone()) installBtn.hidden = false;
+});
+window.addEventListener('appinstalled', () => { installBtn.hidden = true; installPrompt = null; toast('Card Float installed'); });
+if (isIOS && !isStandalone()) installBtn.hidden = false;
+
+installBtn.addEventListener('click', async () => {
+  if (installPrompt) {
+    installPrompt.prompt();
+    const { outcome } = await installPrompt.userChoice;
+    installPrompt = null;
+    if (outcome === 'accepted') installBtn.hidden = true;
+  } else if (isIOS) {
+    document.getElementById('iosSheet').showModal();
+  }
+});
+
+if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+  window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
 }
 
 render();

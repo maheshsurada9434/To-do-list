@@ -2,7 +2,16 @@
 
 A single-page, no-install web app that tells you **which credit card to use on any given day** to get the longest interest-free period — and reminds you before every payment is due.
 
-Open `index.html` in any browser, or host it on GitHub Pages. No build step, no server, no dependencies.
+**Live app:** https://maheshsurada9434.github.io/card-float-planner/
+
+No build step, no server, no dependencies — open `index.html` in any browser or host it on GitHub Pages.
+
+## Install on your phone
+
+- **Android (Chrome):** open the live app and tap **Install app** at the top (or ⋮ menu → *Install app*).
+- **iPhone (Safari):** open the live app, tap **Share** → **Add to Home Screen** → **Add**.
+
+It opens full screen like a normal app and keeps working offline.
 
 ## Features
 
