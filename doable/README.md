@@ -2,7 +2,7 @@
 
 A fast, offline to-do app you can install on your phone. Type tasks the way you'd say them — Doable picks out the date, time, tags, priority and repeat for you.
 
-**Live app:** https://maheshsurada9434.github.io/To-do-list/doable/
+**Live app:** https://maheshsurada9434.github.io/card-float-planner/doable/
 
 ## Type it like you'd say it
 
