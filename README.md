@@ -12,6 +12,7 @@ Open `index.html` in any browser, or host it on GitHub Pages. No build step, no 
 - **Cards** – add, edit and delete cards. Statement day 29–31 is handled correctly in shorter months.
 - **Reminders** – a banner lists every payment due in the next 5 days (or overdue), plus a badge on the Spends tab.
 - **Your data stays yours** – everything is saved automatically in the browser (`localStorage`). Export / import a JSON backup from the Cards tab to move between devices.
+- **Premium card view** – the best card is shown as a realistic credit card (chip, contactless mark, embossed dates) in the colour you pick for each card.
 - Dark mode, mobile-first layout, keyboard and screen-reader friendly.
 
 ## How the math works
