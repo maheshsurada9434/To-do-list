@@ -1,7 +1,7 @@
-// Card Float service worker.
+// Doable service worker.
 // Pages are fetched network-first so new versions show up right away;
 // the cached copy is only used when you're offline.
-const VERSION = 'cardfloat-v4';
+const VERSION = 'doable-v1';
 const CORE = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png'];
 
 self.addEventListener('install', event => {
@@ -20,12 +20,6 @@ self.addEventListener('fetch', event => {
   const req = event.request;
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
-  const scopePath = new URL(self.registration.scope).pathname;
-  // Leave other apps hosted in sub-folders (e.g. doable/) to their own service worker.
-  if (url.origin === self.location.origin && url.pathname.startsWith(scopePath)) {
-    const rest = url.pathname.slice(scopePath.length);
-    if (rest.includes('/') && !rest.startsWith('icons/')) return;
-  }
 
   // Pages: network first, fall back to cache when offline.
   if (req.mode === 'navigate') {

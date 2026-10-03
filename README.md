@@ -2,7 +2,7 @@
 
 A single-page, no-install web app that tells you **which credit card to use on any given day** to get the longest interest-free period — and reminds you before every payment is due.
 
-**Live app:** https://maheshsurada9434.github.io/card-float-planner/
+**Live app:** https://maheshsurada9434.github.io/To-do-list/
 
 No build step, no server, no dependencies — open `index.html` in any browser or host it on GitHub Pages.
 
@@ -39,3 +39,10 @@ A spend made the day *after* a card's statement date gets the maximum float (abo
 ## Privacy
 
 Nothing leaves your device. There is no server, analytics or tracking.
+
+## Also in this repo: Doable
+
+[`doable/`](doable/) is an advanced, offline to-do app. You type tasks in plain English, and it picks up dates, times, #tags, !priority and repeats. It also has subtasks, a focus timer and lists. It installs to your home screen like Card Float.
+
+**Live:** https://maheshsurada9434.github.io/To-do-list/doable/
+
